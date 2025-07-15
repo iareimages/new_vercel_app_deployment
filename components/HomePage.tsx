@@ -82,16 +82,28 @@ const HomePage: React.FC<HomePageProps> = ({ songs, onSongPlay, formatNumber, on
             <button className="text-purple-400 text-sm font-medium">See all</button>
           </div>
           <div className="space-y-3">
-            {songs.map((song) => (
-              <SongCard
-                key={song.id}
-                song={{ ...song, image: imageUrls[song.id] || '' }}
-                onPlay={onSongPlay}
-                formatNumber={formatNumber}
-                onAddToPlaylist={onAddToPlaylist}
-                cachedImageUrl={imageUrls[song.id]}
-              />
-            ))}
+            {songs.map((song) => {
+  console.log(
+    'Rendering song:',
+    song.name,
+    '| ID:',
+    song.id,
+    '| Image URL:',
+    imageUrls[song.id] || 'No image URL'
+  );
+  
+  return (
+    <SongCard
+      key={song.id}
+      song={{ ...song, image: imageUrls[song.id] || '' }}
+      onPlay={onSongPlay}
+      formatNumber={formatNumber}
+      onAddToPlaylist={onAddToPlaylist}
+      cachedImageUrl={imageUrls[song.id]}
+    />
+  );
+})}
+
           </div>
           
           {/* Load More Button */}
