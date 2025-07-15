@@ -1,0 +1,3360 @@
+# Complete Music Player Codebase Export
+
+## README.md
+```
+# newproject
+```
+
+## package.json
+```json
+{
+  "name": "nextjs-music-player",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@supabase/auth-ui-react": "^0.4.7",
+    "@supabase/auth-ui-shared": "^0.1.8",
+    "@supabase/supabase-js": "^2.50.3",
+    "lucide-react": "^0.344.0",
+    "next": "^14.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.18",
+    "eslint": "^8.0.0",
+    "eslint-config-next": "^14.0.0",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.5.3"
+  }
+}
+```
+
+## next.config.js
+```javascript
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  images: {
+    domains: ['images.pexels.com'],
+  },
+  swcMinify: false, // 🔧 Disable minification
+  compress: false,  // 🔧 Optional: turn off gzip to reduce confusion
+};
+
+module.exports = nextConfig;
+```
+
+## tailwind.config.js
+```javascript
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+## postcss.config.js
+```javascript
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+```
+
+## tsconfig.json
+```json
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "es6"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+```
+
+## eslint.config.js
+```javascript
+import js from '@eslint/js';
+import globals from 'globals';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import tseslint from 'typescript-eslint';
+
+export default tseslint.config(
+  { ignores: ['dist'] },
+  {
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    files: ['**/*.{ts,tsx}'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+    },
+    plugins: {
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
+    },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
+    },
+  }
+);
+```
+
+## next-env.d.ts
+```typescript
+/// <reference types="next" />
+/// <reference types="next/image-types/global" />
+/// <reference types="next/navigation-types/compat/navigation" />
+
+// NOTE: This file should not be edited
+// see https://nextjs.org/docs/app/building-your-application/configuring/typescript for more information.
+```
+
+## app/globals.css
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom scrollbar styles */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Ensure body has no scrollbar */
+body {
+  overflow-x: hidden;
+}
+
+/* Custom mobile styles */
+@media (max-width: 768px) {
+  .mobile-only {
+    display: block;
+  }
+}
+
+/* Smooth transitions */
+* {
+  transition: all 0.2s ease;
+}
+
+/* Custom gradient backgrounds */
+.gradient-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Custom button styles */
+.btn-primary {
+  @apply bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-full font-medium transition-colors;
+}
+
+.btn-secondary {
+  @apply bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-full font-medium transition-colors;
+}
+```
+
+## app/layout.tsx
+```typescript
+import type { Metadata } from 'next'
+import './globals.css'
+import { ThemeProvider } from '@/components/ThemeContext'
+
+export const metadata: Metadata = {
+  title: 'Mobile Music Player App',
+  description: 'A beautiful mobile music player with playlist functionality',
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body><ThemeProvider>{children}</ThemeProvider></body>
+    </html>
+  )
+}
+```
+
+## app/page.tsx
+```typescript
+ 'use client'
+
+import React, { useState, createContext, useContext, useEffect,useRef } from 'react';
+import { Home as HomeIcon, Search, Settings } from 'lucide-react';
+import HomePage from '@/components/HomePage';
+import SearchPage from '@/components/SearchPage';
+import SettingsPage from '@/components/SettingsPage';
+import PlaylistsPage from '@/components/PlaylistsPage';
+import LikedSongsPage from '@/components/LikedSongsPage';
+import MinimizedPlayer from '@/components/MinimizedPlayer';
+import MaximizedPlayer from '@/components/MaximizedPlayer';
+import CreatePlaylistModal from '@/components/CreatePlaylistModal';
+import AddToPlaylistModal from '@/components/AddToPlaylistModal';
+import AuthWrapper from '@/components/AuthWrapper';
+import { useAuth } from '@/hooks/useAuth';
+import { useSupabaseData } from '@/hooks/useSupabaseData';
+import { Song } from '@/types';
+import { useTheme } from '@/components/ThemeContext';
+
+
+function MusicPlayerContent() {
+  const { user } = useAuth();
+  const {
+    songs,
+    playlists,
+    likedSongs,
+    lastPlayedSong,
+    loading,
+    toggleLike,
+    createPlaylist,
+    deletePlaylist,
+    renamePlaylist,
+    addSongToPlaylist,
+    removeSongFromPlaylist,
+    recordListeningHistory,
+    stopCurrentSongTracking
+  } = useSupabaseData(user);
+
+  const [activeTab, setActiveTab] = useState<'home' | 'search' | 'settings'>('home');
+  const [currentPage, setCurrentPage] = useState<'main' | 'playlists' | 'liked'>('main');
+  const [currentSong, setCurrentSong] = useState<Song | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlayerMaximized, setIsPlayerMaximized] = useState(false);
+  const [showCreatePlaylistModal, setShowCreatePlaylistModal] = useState(false);
+  const [showAddToPlaylistModal, setShowAddToPlaylistModal] = useState(false);
+  const [selectedSongForPlaylist, setSelectedSongForPlaylist] = useState<Song | null>(null);
+  const [hasSetLastPlayedSong, setHasSetLastPlayedSong] = useState(false);
+  const [lastPlayedSongDismissed, setLastPlayedSongDismissed] = useState(false);
+  const { isDarkMode, toggleTheme } = useTheme();
+  const [displayCount, setDisplayCount] = useState(15);
+  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(0.75); // default 75%
+  const [isSeeking, setIsSeeking] = useState(false);
+  const [pendingSeekTime, setPendingSeekTime] = useState<number | null>(null);
+  const [isExternallySeeking, setIsExternallySeeking] = useState(false);
+
+
+const loadMoreSongs = () => {
+  setDisplayCount(prev => prev + 15);
+};
+
+const displayedSongs = songs.slice(0, displayCount);
+useEffect(() => {
+  const loadAudio = async () => {
+    if (currentSong?.file_id) {
+      const url = `/api/audio-proxy?fileid=${currentSong.file_id}`;
+      setAudioUrl(url);
+
+      setDuration(0);
+      setCurrentTime(0);
+      setPendingSeekTime(null);
+    }
+  };
+
+  loadAudio();
+}, [currentSong?.file_id]);
+
+
+
+useEffect(() => {
+  if (audioRef.current) {
+    audioRef.current.volume = volume;
+  }
+}, [volume]);
+
+useEffect(() => {
+  const audio = audioRef.current;
+  if (!audio) return;
+
+  if (!isNaN(audio.duration) && isPlaying) {
+    // Duration is valid, safe to play
+    audio.play().catch((e) => {
+      console.error('Playback error:', e);
+    });
+  } else if (!isPlaying) {
+    audio.pause();
+  }
+}, [isPlaying]);
+
+
+
+
+// Load images for currently displayed songs
+useEffect(() => {
+  const fetchImages = async () => {
+    const newUrls: Record<string, string> = {};
+
+    // Songs from the main feed
+    const songsToLoad = songs.slice(0, displayCount);
+    for (const song of songsToLoad) {
+      if (!imageUrls[song.id]) {
+        newUrls[song.id] = `/api/image-proxy?fileid=${song.img_id}`;
+      }
+    }
+
+    // Songs from playlists
+    for (const playlist of playlists) {
+      for (const song of playlist.songs) {
+        if (!imageUrls[song.id]) {
+          newUrls[song.id] = `/api/image-proxy?fileid=${song.img_id}`;
+        }
+      }
+    }
+
+    // Liked songs
+    for (const song of likedSongs) {
+      if (!imageUrls[song.id]) {
+        newUrls[song.id] = `/api/image-proxy?fileid=${song.img_id}`;
+      }
+    }
+
+    // Apply if new URLs found
+    if (Object.keys(newUrls).length > 0) {
+      setImageUrls(prev => ({ ...prev, ...newUrls }));
+    }
+  };
+
+  fetchImages();
+}, [displayCount, songs, playlists, likedSongs]);
+
+
+
+  // Set last played song as current song when data loads (only once and if not dismissed)
+useEffect(() => {
+  const loadLastPlayedImage = async () => {
+    if (
+      lastPlayedSong &&
+      !currentSong &&
+      !hasSetLastPlayedSong &&
+      !lastPlayedSongDismissed
+    ) {
+      setCurrentSong(lastPlayedSong);
+      setIsPlaying(false);
+      setHasSetLastPlayedSong(true);
+
+      if (!imageUrls[lastPlayedSong.img_id]) {
+        const url = `/api/image-proxy?fileid=${lastPlayedSong.img_id}`;
+        setImageUrls((prev) => ({
+          ...prev,
+          [lastPlayedSong.img_id]: url
+        }));
+      }
+    }
+  };
+
+  loadLastPlayedImage();
+}, [lastPlayedSong, currentSong, hasSetLastPlayedSong, lastPlayedSongDismissed, imageUrls]);
+
+
+  
+
+  const handleSongPlay = (song: Song) => {
+    setCurrentSong(song);
+    setIsPlaying(true);
+    setLastPlayedSongDismissed(false); // Reset dismissal when user actively plays a song
+    // Record listening history and update last song
+    recordListeningHistory(song.id);
+  };
+
+  const togglePlay = () => {
+    setIsPlaying(!isPlaying);
+  };
+
+  const togglePlayerSize = () => {
+    setIsPlayerMaximized(!isPlayerMaximized);
+  };
+
+  const closePlayer = async () => {
+    // Stop tracking current song before closing
+    await stopCurrentSongTracking();
+    setCurrentSong(null);
+    setIsPlaying(false);
+    setIsPlayerMaximized(false);
+    
+    // Mark last played song as dismissed so it won't auto-load again
+    setLastPlayedSongDismissed(true);
+  };
+
+  const handleToggleLike = (songId: string) => {
+    toggleLike(songId);
+    
+    // Update current song state if it's the one being liked/unliked
+    if (currentSong && currentSong.id === songId) {
+      setCurrentSong(prev => prev ? { ...prev, isLiked: !prev.isLiked } : null);
+    }
+  };
+
+  const handlePrevious = () => {
+  if (!currentSong) return;
+
+  const currentIndex = songs.findIndex(song => song.id === currentSong.id);
+  const prevIndex = currentIndex > 0 ? currentIndex - 1 : songs.length - 1;
+  const prevSong = songs[prevIndex];
+
+  setCurrentSong(prevSong);
+  setIsPlaying(true);
+  setLastPlayedSongDismissed(false);
+  recordListeningHistory(prevSong.id);
+
+  // Preload image
+  if (!imageUrls[prevSong.img_id]) {
+    const newUrl = `/api/image-proxy?fileid=${prevSong.img_id}`;
+    setImageUrls(prev => ({ ...prev, [prevSong.img_id]: newUrl }));
+  }
+};
+useEffect(() => {
+  if (!currentSong) return;
+
+  const currentIndex = songs.findIndex(song => song.id === currentSong.id);
+  const nextIndex = currentIndex < songs.length - 1 ? currentIndex + 1 : 0;
+  const nextSong = songs[nextIndex];
+
+  // Preload next song image if not in cache
+  if (nextSong && !imageUrls[nextSong.img_id]) {
+    const newUrl = `/api/image-proxy?fileid=${nextSong.img_id}`;
+    setImageUrls(prev => ({ ...prev, [nextSong.img_id]: newUrl }));
+  }
+}, [currentSong, songs]);
+
+const handleLoadedMetadata = async () => {
+  const audio = audioRef.current;
+  if (!audio) return;
+
+  const loadedDuration = audio.duration;
+
+  if (!isNaN(loadedDuration) && isFinite(loadedDuration)) {
+    setDuration(loadedDuration);
+
+    if (pendingSeekTime !== null) {
+      audio.currentTime = pendingSeekTime;
+      setCurrentTime(pendingSeekTime);
+      setPendingSeekTime(null);
+    } else {
+      setCurrentTime(audio.currentTime);
+    }
+
+    try {
+      if (isPlaying) {
+        await audio.play();
+      }
+    } catch (err) {
+      console.error('Auto-play error after metadata load:', err);
+    }
+
+  } else {
+    // Retry metadata read
+    setTimeout(handleLoadedMetadata, 100);
+  }
+};
+
+
+
+
+
+
+const handleNext = () => {
+  if (!currentSong) return;
+
+  const currentIndex = songs.findIndex(song => song.id === currentSong.id);
+  const nextIndex = currentIndex < songs.length - 1 ? currentIndex + 1 : 0;
+  const nextSong = songs[nextIndex];
+
+  setCurrentSong(nextSong);
+  setIsPlaying(true);
+  setLastPlayedSongDismissed(false);
+  recordListeningHistory(nextSong.id);
+
+  // Preload image in background
+  if (!imageUrls[nextSong.img_id]) {
+    const newUrl = `/api/image-proxy?fileid=${nextSong.img_id}`;
+    setImageUrls(prev => ({ ...prev, [nextSong.img_id]: newUrl }));
+  }
+};
+
+
+
+
+  const formatNumber = (num: number): string => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
+  };
+
+  const handleAddToPlaylist = (song: Song) => {
+    setSelectedSongForPlaylist(song);
+    setShowAddToPlaylistModal(true);
+  };
+
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+            <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>Loading your music...</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (currentPage === 'playlists') {
+      return (
+        <PlaylistsPage 
+          playlists={playlists} 
+          onBack={() => setCurrentPage('main')} 
+          onSongPlay={handleSongPlay}
+          onCreatePlaylist={() => setShowCreatePlaylistModal(true)}
+          onDeletePlaylist={deletePlaylist}
+          onRenamePlaylist={renamePlaylist}
+          onRemoveSongFromPlaylist={removeSongFromPlaylist}
+          imageUrls={imageUrls}
+        />
+      );
+    }
+    
+    if (currentPage === 'liked') {
+      return <LikedSongsPage songs={likedSongs} onBack={() => setCurrentPage('main')} onSongPlay={handleSongPlay} imageUrls={imageUrls}/>;
+    }
+
+    switch (activeTab) {
+      case 'home':
+        return <HomePage
+                songs={displayedSongs}
+                onSongPlay={handleSongPlay}
+                formatNumber={formatNumber}
+                onAddToPlaylist={handleAddToPlaylist}
+                imageUrls={imageUrls}
+                onLoadMore={loadMoreSongs}
+                hasMoreSongs={displayCount < songs.length}
+              />;
+      case 'search':
+        return <SearchPage
+              songs={songs}
+              onSongPlay={handleSongPlay}
+              formatNumber={formatNumber}
+              onAddToPlaylist={handleAddToPlaylist}
+              imageUrls={imageUrls}
+              setImageUrls={setImageUrls}
+            />;
+      case 'settings':
+        return <SettingsPage onPlaylistsClick={() => setCurrentPage('playlists')} onLikedClick={() => setCurrentPage('liked')} />;
+      default:
+        return <HomePage
+              songs={displayedSongs}
+              onSongPlay={handleSongPlay}
+              formatNumber={formatNumber}
+              onAddToPlaylist={handleAddToPlaylist}
+              imageUrls={imageUrls}
+              onLoadMore={loadMoreSongs}
+              hasMoreSongs={displayCount < songs.length}
+            />;
+    }
+  };
+
+  const themeClasses = isDarkMode 
+    ? 'bg-gray-900 text-white' 
+    : 'bg-gray-50 text-gray-900';
+const setCurrentTimeState = setCurrentTime;
+
+  return (
+    
+      <div className={`min-h-screen ${themeClasses} relative overflow-hidden`}>
+        {/* Main Content */}
+        <div className={`transition-all duration-300 ${currentSong ? 'pb-36' : 'pb-20'}`}>
+          {renderContent()}
+        </div>
+
+        {/* Bottom Navigation */}
+        {currentPage === 'main' && (
+          <div className={`fixed bottom-0 left-0 right-0 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t z-30`}>
+            <div className="flex items-center justify-around py-3">
+              <button
+                onClick={() => setActiveTab('home')}
+                className={`flex flex-col items-center space-y-1 p-2 transition-colors ${
+                  activeTab === 'home' ? 'text-purple-400' : isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}
+              >
+                <HomeIcon size={24} />
+                <span className="text-xs">Home</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('search')}
+                className={`flex flex-col items-center space-y-1 p-2 transition-colors ${
+                  activeTab === 'search' ? 'text-purple-400' : isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}
+              >
+                <Search size={24} />
+                <span className="text-xs">Search</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('settings')}
+                className={`flex flex-col items-center space-y-1 p-2 transition-colors ${
+                  activeTab === 'settings' ? 'text-purple-400' : isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}
+              >
+                <Settings size={24} />
+                <span className="text-xs">Settings</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Music Player - Only show if currentSong exists */}
+        {currentSong && (
+          <>
+            {!isPlayerMaximized ? (
+              <MinimizedPlayer
+                song={currentSong}
+                isPlaying={isPlaying}
+                imageUrl={imageUrls[currentSong.img_id]}
+                onTogglePlay={togglePlay}
+                onMaximize={togglePlayerSize}
+                onPrevious={handlePrevious}
+                onNext={handleNext}
+                onClose={closePlayer}
+                onToggleLike={() => handleToggleLike(currentSong.id)}
+                formatNumber={formatNumber}
+              />
+            ) : (
+              <MaximizedPlayer
+                song={currentSong}
+                isPlaying={isPlaying}
+                imageUrl={imageUrls[currentSong.img_id]}
+                onTogglePlay={togglePlay}
+                onMinimize={togglePlayerSize}
+                onPrevious={handlePrevious}
+                onNext={handleNext}
+                onToggleLike={() => handleToggleLike(currentSong.id)}
+                formatNumber={formatNumber}
+                onAddToPlaylist={() => handleAddToPlaylist(currentSong)}
+                currentTime={currentTime}
+                duration={duration}
+
+              setCurrentTime={(seekTime) => {
+  if (audioRef.current && !isNaN(audioRef.current.duration)) {
+    setIsExternallySeeking(true);
+    audioRef.current.currentTime = seekTime;
+    setCurrentTimeState(seekTime);
+    setTimeout(() => setIsExternallySeeking(false), 200);
+  } else {
+    setPendingSeekTime(seekTime); // Will apply onLoadedMetadata
+  }
+}}
+
+
+
+                volume={volume}
+                setVolume={setVolume}
+                isSeeking={isSeeking}
+                setIsSeeking={setIsSeeking}
+              />
+            )}
+          </>
+        )}
+
+        {/* Modals */}
+        <CreatePlaylistModal
+          isOpen={showCreatePlaylistModal}
+          onClose={() => setShowCreatePlaylistModal(false)}
+          onCreatePlaylist={createPlaylist}
+        />
+
+        <AddToPlaylistModal
+          isOpen={showAddToPlaylistModal}
+          onClose={() => {
+            setShowAddToPlaylistModal(false);
+            setSelectedSongForPlaylist(null);
+          }}
+          song={selectedSongForPlaylist}
+          playlists={playlists}
+          onAddToPlaylist={addSongToPlaylist}
+          onCreatePlaylist={() => {
+            setShowAddToPlaylistModal(false);
+            setShowCreatePlaylistModal(true);
+          }}
+          imageUrls={imageUrls}
+          setImageUrls={setImageUrls}
+        />
+        <audio
+  ref={audioRef}
+  src={audioUrl ?? undefined}
+  onEnded={handleNext}
+  onTimeUpdate={() => {
+  if (audioRef.current && !isSeeking && !isExternallySeeking) {
+    const current = audioRef.current.currentTime;
+    // Only update state if the difference is significant
+    if (Math.abs(currentTime - current) > 0.25) {
+      setCurrentTime(current);
+    }
+  }
+}}
+
+
+  onLoadedMetadata={handleLoadedMetadata}
+  onVolumeChange={() => {
+    if (audioRef.current) {
+      setVolume(audioRef.current.volume);
+    }
+  }}
+  style={{ display: 'none' }}
+/>
+
+      </div>
+  );
+}
+
+export default function MusicPlayerApp() {
+  return (
+    <AuthWrapper>
+      <MusicPlayerContent />
+    </AuthWrapper>
+  );
+}
+```
+
+## components/AddToPlaylistModal.tsx
+```typescript
+import React from 'react';
+import { X, Plus, Music } from 'lucide-react';
+import { useTheme } from '@/components/ThemeContext';
+import { Song, Playlist } from '@/types';
+import { getFileLink } from '@/lib/pcloud'; // adjust path if needed
+import { useEffect } from 'react';
+
+interface AddToPlaylistModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  song: Song | null;
+  playlists: Playlist[];
+  onAddToPlaylist: (playlistId: string, song: Song) => void;
+  onCreatePlaylist: () => void;
+  imageUrls: Record<string, string>;
+  setImageUrls: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+}
+
+const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  song,
+  playlists,
+  onAddToPlaylist,
+  onCreatePlaylist,
+  imageUrls,
+  setImageUrls
+}) => {
+  const { isDarkMode } = useTheme();
+
+  if (!isOpen || !song) return null;
+
+  const handleAddToPlaylist = (playlistId: string) => {
+    onAddToPlaylist(playlistId, song);
+    onClose();
+  };
+
+  const handleCreateNew = () => {
+    onCreatePlaylist();
+  };
+
+useEffect(() => {
+  const preloadFirstSongImages = async () => {
+    const updates: Record<string, string> = {};
+
+    for (const playlist of playlists) {
+      const firstSong = playlist.songs?.[0];
+      if (firstSong && !imageUrls[firstSong.id]) {
+        try {
+          const link = await getFileLink(firstSong.img_id);
+          updates[firstSong.id] = link;
+        } catch (error) {
+          console.error('Failed to fetch image link:', error);
+        }
+      }
+    }
+
+    if (Object.keys(updates).length > 0) {
+      setImageUrls(prev => ({ ...prev, ...updates }));
+    }
+  };
+
+  preloadFirstSongImages();
+}, [playlists, imageUrls, setImageUrls]);
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6 w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col`}>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">Add to Playlist</h2>
+          <button
+            onClick={onClose}
+            className={`p-2 ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} rounded-full transition-colors`}
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Song Info */}
+        <div className={`flex items-center p-3 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg mb-4`}>
+          <img
+            src={imageUrls[song.id] || '/placeholder.png'}
+            alt={song.name}
+            className="w-12 h-12 rounded-lg object-cover mr-3"
+          />
+          <div className="flex-1 min-w-0">
+            <h3 className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'} truncate`}>{song.name}</h3>
+            <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-sm truncate`}>{song.artist}</p>
+          </div>
+        </div>
+
+        {/* Create New Playlist Button */}
+        <button
+          onClick={handleCreateNew}
+          className={`w-full flex items-center p-4 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'} rounded-lg transition-colors mb-4`}
+        >
+          <div className={`w-12 h-12 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'} rounded-lg flex items-center justify-center mr-3`}>
+            <Plus size={20} className={isDarkMode ? 'text-gray-300' : 'text-gray-600'} />
+          </div>
+          <span className="font-medium">Create New Playlist</span>
+        </button>
+
+        {/* Playlists List */}
+        <div className="flex-1 overflow-y-auto">
+          <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`}>
+            Your Playlists
+          </h3>
+          <div className="space-y-2">
+            {playlists.map((playlist) => {
+                const songExists = playlist.songs.some(s => s.id === song.id);
+                const firstSongId = playlist.songs?.[0]?.id;
+                const image = firstSongId && imageUrls[firstSongId]
+                  ? imageUrls[firstSongId]
+                  : '/placeholder.png';
+
+                return (
+                  <button
+                    key={playlist.id}
+                    onClick={() => !songExists && handleAddToPlaylist(playlist.id)}
+                    disabled={songExists}
+                    className={`w-full flex items-center p-3 rounded-lg transition-colors ${
+                      songExists 
+                        ? `${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-100/50'} cursor-not-allowed opacity-50`
+                        : `${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={playlist.name}
+                      className="w-12 h-12 rounded-lg object-cover mr-3"
+                    />
+                    <div className="flex-1 text-left">
+                      <h4 className="font-medium">{playlist.name}</h4>
+                      <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>
+                        {playlist.songCount} songs
+                      </p>
+                    </div>
+                    {songExists && (
+                      <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                        Already added
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AddToPlaylistModal;
+```
+
+## components/AuthWrapper.tsx
+```typescript
+import React from 'react'
+import { useAuth } from '@/hooks/useAuth'
+import LoginPage from './LoginPage'
+import LoadingSpinner from './LoadingSpinner'
+
+interface AuthWrapperProps {
+  children: React.ReactNode
+}
+
+const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return <LoadingSpinner />
+  }
+
+  if (!user) {
+    return <LoginPage />
+  }
+
+  return <>{children}</>
+}
+
+export default AuthWrapper
+```
+
+## components/CreatePlaylistModal.tsx
+```typescript
+import React, { useState } from 'react';
+import { X, Plus, Music } from 'lucide-react';
+import { useTheme } from '@/components/ThemeContext';
+
+interface CreatePlaylistModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onCreatePlaylist: (name: string) => void;
+}
+
+const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  onCreatePlaylist 
+}) => {
+  const { isDarkMode } = useTheme();
+  const [playlistName, setPlaylistName] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (playlistName.trim()) {
+      onCreatePlaylist(playlistName.trim());
+      setPlaylistName('');
+      onClose();
+    }
+  };
+
+  const handleClose = () => {
+    setPlaylistName('');
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6 w-full max-w-md`}>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">Create Playlist</h2>
+          <button
+            onClick={handleClose}
+            className={`p-2 ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} rounded-full transition-colors`}
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex items-center justify-center mb-6">
+            <div className={`w-24 h-24 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-lg flex items-center justify-center`}>
+              <Music size={32} className={isDarkMode ? 'text-gray-400' : 'text-gray-500'} />
+            </div>
+          </div>
+
+          <div>
+            <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Playlist Name
+            </label>
+            <input
+              type="text"
+              value={playlistName}
+              onChange={(e) => setPlaylistName(e.target.value)}
+              placeholder="Enter playlist name"
+              className={`w-full ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'} border rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500`}
+              autoFocus
+            />
+          </div>
+
+          <div className="flex space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={handleClose}
+              className={`flex-1 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} py-3 rounded-lg font-medium transition-colors`}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!playlistName.trim()}
+              className="flex-1 bg-purple-500 hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center"
+            >
+              <Plus size={18} className="mr-2" />
+              Create
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default CreatePlaylistModal;
+```
+
+## components/HomePage.tsx
+```typescript
+import React, { useState,useEffect } from 'react';
+import { TrendingUp, Music, Plus } from 'lucide-react';
+import { Song } from '@/types';
+import { useTheme } from '@/components/ThemeContext';
+import { useAuth } from '@/hooks/useAuth';
+import SongCard from './SongCard';
+import TrendingSong from './TrendingSong';
+import { getFileLink } from '@/utils/imageCache';
+
+
+interface HomePageProps {
+  songs: Song[];
+  onSongPlay: (song: Song) => void;
+  formatNumber: (num: number) => string;
+  onAddToPlaylist: (song: Song) => void;
+  imageUrls: Record<string, string>;  // NEW
+  onLoadMore: () => void;             // NEW
+  hasMoreSongs: boolean;              // NEW
+}
+
+
+const HomePage: React.FC<HomePageProps> = ({ songs, onSongPlay, formatNumber, onAddToPlaylist,imageUrls,onLoadMore,hasMoreSongs }) => {
+  const { isDarkMode } = useTheme();
+  const { user } = useAuth();
+  
+
+
+
+  return (
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+      {/* Header */}
+      <div className={`sticky top-0 ${isDarkMode ? 'bg-gray-900/95' : 'bg-gray-50/95'} backdrop-blur-md z-10 px-4 py-4`}>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-2xl font-bold">Good evening</h1>
+            <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>What do you want to listen to?</p>
+          </div>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden">
+            {user?.user_metadata?.avatar_url ? (
+              <img 
+                src={user.user_metadata.avatar_url} 
+                alt="Profile" 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                <Music size={20} className="text-white" />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="px-4 pb-4">
+        {/* Trending Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold flex items-center">
+              <TrendingUp className="mr-2 text-purple-400" size={20} />
+              Trending Now
+            </h2>
+            <button className="text-purple-400 text-sm font-medium">See all</button>
+          </div>
+          <div className="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
+            {songs.slice(0, 10).map((song) => (
+              <TrendingSong 
+                key={song.id}
+                song={{ ...song, image: imageUrls[song.id] || '' }}
+                onPlay={onSongPlay}
+                formatNumber={formatNumber}
+                cachedImageUrl={imageUrls[song.id]}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Recommendations Section */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Made for you</h2>
+            <button className="text-purple-400 text-sm font-medium">See all</button>
+          </div>
+          <div className="space-y-3">
+            {songs.map((song) => {
+  console.log(
+    'Rendering song:',
+    song.name,
+    '| ID:',
+    song.id,
+    '| Image URL:',
+    imageUrls[song.id] || 'No image URL'
+  );
+  
+  return (
+    <SongCard
+      key={song.id}
+      song={{ ...song, image: imageUrls[song.id] || '' }}
+      onPlay={onSongPlay}
+      formatNumber={formatNumber}
+      onAddToPlaylist={onAddToPlaylist}
+      cachedImageUrl={imageUrls[song.id]}
+    />
+  );
+})}
+
+          </div>
+          
+          {/* Load More Button */}
+          {hasMoreSongs && (
+  <div className="flex justify-center mt-6">
+    <button
+      onClick={onLoadMore}
+      className={`flex items-center space-x-2 px-6 py-3 ${
+        isDarkMode ? 'bg-gray-800 hover:bg-gray-700 border-gray-700' : 'bg-white hover:bg-gray-50 border-gray-200'
+      } border rounded-full transition-colors`}
+    >
+      <Plus size={18} className="text-purple-400" />
+      <span className={isDarkMode ? 'text-white' : 'text-gray-900'}>Load More</span>
+    </button>
+  </div>
+)}
+
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default HomePage;
+```
+
+## components/LikedSongsPage.tsx
+```typescript
+import React from 'react';
+import { ArrowLeft, Heart, Play } from 'lucide-react';
+import { Song } from '@/types';
+import { useTheme } from '@/components/ThemeContext';
+import SongCard from './SongCard';
+
+interface LikedSongsPageProps {
+  songs: Song[];
+  onBack: () => void;
+  onSongPlay: (song: Song) => void;
+  imageUrls: Record<string, string>; 
+}
+
+const LikedSongsPage: React.FC<LikedSongsPageProps> = ({ songs, onBack, onSongPlay,imageUrls }) => {
+  const { isDarkMode } = useTheme();
+
+  const formatNumber = (num: number): string => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
+  };
+
+  return (
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+      {/* Header */}
+      <div className={`sticky top-0 ${isDarkMode ? 'bg-gray-900/95' : 'bg-gray-50/95'} backdrop-blur-md z-10 px-4 py-4`}>
+        <div className="flex items-center mb-4">
+          <button 
+            onClick={onBack}
+            className={`p-2 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200'} rounded-full transition-colors mr-3`}
+          >
+            <ArrowLeft size={24} />
+          </button>
+          <h1 className="text-2xl font-bold">Liked Songs</h1>
+        </div>
+      </div>
+
+      {/* Liked Songs Header */}
+      <div className="px-4 mb-6">
+        <div className="flex items-center mb-4">
+          <div className="w-32 h-32 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mr-4">
+            <Heart size={48} className="text-white" fill="white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold mb-2">Liked Songs</h2>
+            <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
+              {songs.length} songs
+            </p>
+            {songs.length > 0 && (
+              <button className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-full flex items-center transition-colors">
+                <Play size={16} className="mr-2" fill="white" />
+                Play All
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Songs */}
+      <div className="px-4 pb-4">
+        {songs.length > 0 ? (
+          <div className="space-y-3">
+            {songs.map((song) => (
+              <SongCard key={song.id} song={song} onPlay={onSongPlay} formatNumber={formatNumber}  cachedImageUrl={imageUrls[song.id] || '/placeholder.png'}/>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <Heart size={64} className={`mx-auto mb-4 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
+            <h3 className="text-xl font-semibold mb-2">No liked songs yet</h3>
+            <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
+              Songs you like will appear here
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default LikedSongsPage;
+```
+
+## components/LoadingSpinner.tsx
+```typescript
+import React from 'react'
+import { Music } from 'lucide-react'
+
+const LoadingSpinner: React.FC = () => {
+  return (
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+          <Music size={32} className="text-white" />
+        </div>
+        <p className="text-white text-lg">Loading your music...</p>
+      </div>
+    </div>
+  )
+}
+
+export default LoadingSpinner
+```
+
+## components/LoginPage.tsx
+```typescript
+import React from 'react'
+import { Music } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
+
+const GoogleIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+  </svg>
+)
+
+const LoginPage: React.FC = () => {
+  const { signInWithGoogle } = useAuth()
+
+  return (
+    <div className="min-h-screen bg-black flex items-center justify-center p-3">
+      <div className="bg-gray-900/95 backdrop-blur-xl rounded-2xl p-6 w-full max-w-sm text-center border border-gray-800/50 shadow-2xl relative overflow-hidden">
+        {/* Background gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900/50 via-black/80 to-gray-900/50 rounded-2xl"></div>
+        
+        {/* Content */}
+        <div className="relative z-10">
+          <div className="mb-8">
+            <div className="w-16 h-16 bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Music size={32} className="text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              Music Player
+            </h1>
+            <p className="text-gray-400 text-sm">Discover your favorite music</p>
+          </div>
+
+          <div className="space-y-4">
+            <button
+              onClick={signInWithGoogle}
+              className="w-full bg-gradient-to-r from-gray-800 to-black hover:from-gray-700 hover:to-gray-900 text-white font-medium py-3 px-6 rounded-xl flex items-center justify-center space-x-3 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] border border-gray-700/50 active:scale-[0.98]"
+            >
+              <GoogleIcon />
+              <span>Continue with Google</span>
+            </button>
+            
+            <p className="text-gray-500 text-xs leading-relaxed px-2">
+              Sign in to access playlists and personalized music
+            </p>
+          </div>
+
+          <div className="mt-6 pt-4 border-t border-gray-800/50">
+            <p className="text-gray-600 text-xs">
+              By signing in, you agree to our Terms & Privacy Policy
+            </p>
+          </div>
+        </div>
+
+        {/* Subtle decorative elements */}
+        <div className="absolute top-2 left-2 w-12 h-12 bg-purple-600/5 rounded-full blur-lg"></div>
+        <div className="absolute bottom-2 right-2 w-10 h-10 bg-pink-600/5 rounded-full blur-lg"></div>
+      </div>
+    </div>
+  )
+}
+
+export default LoginPage
+```
+
+## components/MaximizedPlayer.tsx
+```typescript
+import React, { useState } from 'react';
+import { ChevronDown, MoreHorizontal, Heart, Share2, Play, Pause, SkipBack, SkipForward, Volume2, Repeat, Shuffle, Plus, Eye } from 'lucide-react';
+import { Song } from '@/types';
+import { useTheme } from '@/components/ThemeContext';
+
+interface MaximizedPlayerProps {
+  song: Song;
+  isPlaying: boolean;
+  onTogglePlay: () => void;
+  onMinimize: () => void;
+  onPrevious: () => void;
+  onNext: () => void;
+  onToggleLike: () => void;
+  formatNumber: (num: number) => string;
+  onAddToPlaylist: () => void;
+  imageUrl?: string;
+  currentTime: number;
+  duration: number;
+  setCurrentTime: (time: number) => void;
+  volume: number;
+  setVolume: (volume: number) => void;
+  isSeeking: boolean;
+setIsSeeking: (value: boolean) => void;
+
+}
+
+const MaximizedPlayer: React.FC<MaximizedPlayerProps> = ({
+  song,
+  isPlaying,
+  onTogglePlay,
+  onMinimize,
+  onPrevious,
+  onNext,
+  onToggleLike,
+  formatNumber,
+  onAddToPlaylist,
+  imageUrl,
+  currentTime,
+  duration,
+  setCurrentTime,
+  volume,
+  setVolume,
+  setIsSeeking,
+  isSeeking
+}) => {
+  const { isDarkMode } = useTheme();
+  const [showMenu, setShowMenu] = useState(false);
+  const [localSeekTime, setLocalSeekTime] = useState<number | null>(null);
+
+  const formatTime = (seconds: number) => {
+  if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
+
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
+
+
+  const progressPercentage = (currentTime / duration) * 100;
+
+  const handleLike = () => {
+    onToggleLike();
+  };
+
+  return (
+    <div className={`fixed inset-0 ${isDarkMode ? 'bg-gradient-to-b from-gray-900 via-gray-900 to-black' : 'bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200'} z-50 flex flex-col`}>
+      {/* Header - Fixed */}
+      <div className="flex items-center justify-between p-4 pt-12 flex-shrink-0">
+        <button 
+          onClick={onMinimize} 
+          className={`p-2 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200'} rounded-full transition-colors`}
+        >
+          <ChevronDown size={24} className={isDarkMode ? 'text-white' : 'text-gray-900'} />
+        </button>
+        <div className="text-center flex-1">
+          <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Playing from</p>
+          <p className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-medium`}>Trending Now</p>
+        </div>
+        <div className="relative">
+          <button 
+            onClick={() => setShowMenu(!showMenu)}
+            className={`p-2 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200'} rounded-full transition-colors`}
+          >
+            <MoreHorizontal size={24} className={isDarkMode ? 'text-white' : 'text-gray-900'} />
+          </button>
+          
+          {/* Dropdown Menu */}
+          {showMenu && (
+            <div className={`absolute right-0 top-12 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg shadow-lg py-2 w-48 z-10`}>
+              <button 
+                onClick={() => {
+                  onAddToPlaylist();
+                  setShowMenu(false);
+                }}
+                className={`w-full text-left px-4 py-2 ${isDarkMode ? 'hover:bg-gray-700 text-white' : 'hover:bg-gray-100 text-gray-900'} flex items-center transition-colors`}
+              >
+                <Plus size={16} className="mr-3" />
+                Add to Playlist
+              </button>
+              <button className={`w-full text-left px-4 py-2 ${isDarkMode ? 'hover:bg-gray-700 text-white' : 'hover:bg-gray-100 text-gray-900'} flex items-center transition-colors`}>
+                <Share2 size={16} className="mr-3" />
+                Share
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Scrollable Content Area - Properly contained */}
+      <div className="flex-1 overflow-y-auto px-4">
+        <div className="max-h-full">
+          {/* Album Art - Smaller and centered */}
+          <div className="flex justify-center py-6">
+            <div className="relative w-56 h-56">
+              <img
+                src={imageUrl || song.image}
+                alt={song.name}
+                className="w-full h-full rounded-2xl object-cover shadow-2xl"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl"></div>
+            </div>
+          </div>
+
+          {/* Song Info */}
+          <div className="text-center mb-6">
+            <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>{song.name}</h1>
+            <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-lg`}>{song.artist}</p>
+            <div className="flex items-center justify-center space-x-2 mt-2">
+              <span className={`${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-600'} text-sm px-3 py-1 rounded-full`}>
+                {song.language}
+              </span>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="mb-6">
+            <div className="flex items-center justify-center space-x-6">
+              <div className="flex items-center space-x-1">
+                <Eye size={16} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
+                <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>{formatNumber(song.views)}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Heart size={16} className={`${song.isLiked ? 'text-red-500 fill-red-500' : isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
+                <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>{formatNumber(song.likes)}</span>
+              </div>
+            </div>
+          </div>
+
+                      {/* Progress Bar with Time */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between text-sm font-mono mb-2">
+              <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
+                {formatTime(currentTime)}
+              </span>
+              <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
+                {formatTime(duration)}
+              </span>
+            </div>
+
+           <input
+  type="range"
+  min={0}
+  max={duration}
+  step={0.1}
+  value={isSeeking && localSeekTime !== null ? localSeekTime : currentTime}
+  onChange={(e) => {
+    const newTime = Number(e.target.value);
+    setIsSeeking(true);
+    setLocalSeekTime(newTime); // ✅ Set directly
+  }}
+  onMouseUp={() => {
+    if (localSeekTime !== null) {
+      setIsSeeking(false);
+      setCurrentTime(localSeekTime); // ✅ Triggers audioRef seek in parent
+      setLocalSeekTime(null);
+    } else {
+      console.warn('[MouseUp] localSeekTime was null');
+    }
+  }}
+  onTouchEnd={() => {
+    if (localSeekTime !== null) {
+      setIsSeeking(false);
+      setCurrentTime(localSeekTime); // ✅ Triggers audioRef seek in parent
+      setLocalSeekTime(null);
+    } else {
+      console.warn('[TouchEnd] localSeekTime was null');
+    }
+  }}
+  className="w-full h-2 appearance-none bg-gray-300 rounded-full cursor-pointer"
+  style={{ accentColor: '#a855f7' }}
+/>
+
+          </div>
+
+
+          {/* Main Controls */}
+          <div className="mb-8">
+            <div className="flex items-center justify-center space-x-6">
+              <button className={`p-2 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200'} rounded-full transition-colors`}>
+                <Shuffle size={24} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
+              </button>
+              
+              <button 
+                onClick={onPrevious}
+                className={`p-3 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200'} rounded-full transition-colors`}
+              >
+                <SkipBack size={28} className={isDarkMode ? 'text-white' : 'text-gray-900'} />
+              </button>
+              
+              <button
+                onClick={onTogglePlay}
+                className="p-4 bg-purple-500 hover:bg-purple-600 rounded-full transition-colors shadow-lg"
+              >
+                {isPlaying ? (
+                  <Pause size={32} className="text-white" />
+                ) : (
+                  <Play size={32} className="text-white" fill="white" />
+                )}
+              </button>
+              
+              <button 
+                onClick={onNext}
+                className={`p-3 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200'} rounded-full transition-colors`}
+              >
+                <SkipForward size={28} className={isDarkMode ? 'text-white' : 'text-gray-900'} />
+              </button>
+              
+              <button className={`p-2 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200'} rounded-full transition-colors`}>
+                <Repeat size={24} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
+              </button>
+            </div>
+          </div>
+
+          {/* Bottom Section with Like Button and Volume - Final section */}
+          <div className="pb-8">
+            <div className="flex items-center justify-between">
+              {/* Like Button - Bottom Left */}
+              <button 
+                onClick={handleLike}
+                className={`flex items-center space-x-2 px-4 py-2 ${song.isLiked ? 'bg-red-500 hover:bg-red-600' : isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-full transition-colors`}
+              >
+                <Heart size={18} className={`${song.isLiked ? 'text-white fill-white' : isDarkMode ? 'text-gray-300' : 'text-gray-700'}`} />
+                <span className={`text-sm font-medium ${song.isLiked ? 'text-white' : isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  {song.isLiked ? 'Liked' : 'Like'}
+                </span>
+              </button>
+              
+              {/* Volume Control */}
+              {/* Volume Control */}
+              <div className="flex items-center space-x-3 flex-1 max-w-32 ml-6">
+                <Volume2 size={20} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={volume}
+                  onChange={(e) => setVolume(Number(e.target.value))}
+                  className="w-full h-2 bg-gray-300 rounded-full appearance-none cursor-pointer"
+                  style={{ accentColor: '#a855f7' }}
+                />
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MaximizedPlayer; 
+```
+
+## components/MinimizedPlayer.tsx
+```typescript
+import React from 'react';
+import { Play, Pause, SkipForward, SkipBack, X, Heart } from 'lucide-react';
+import { Song } from '@/types';
+import { useTheme } from '@/components/ThemeContext';
+
+interface MinimizedPlayerProps {
+  song: Song;
+  isPlaying: boolean;
+  onTogglePlay: () => void;
+  onMaximize: () => void;
+  onPrevious: () => void;
+  onNext: () => void;
+  onClose: () => void;
+  onToggleLike: () => void;
+  formatNumber: (num: number) => string;
+  imageUrl?: string;
+}
+
+const MinimizedPlayer: React.FC<MinimizedPlayerProps> = ({
+  song,
+  isPlaying,
+  onTogglePlay,
+  onMaximize,
+  onPrevious,
+  onNext,
+  onClose,
+  onToggleLike,
+  formatNumber,
+  imageUrl
+}) => {
+  const { isDarkMode } = useTheme();
+
+  const handleClose = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onClose();
+  };
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggleLike();
+  };
+
+  return (
+    <div className={`fixed bottom-20 left-0 right-0 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t z-40 shadow-lg`}>
+      {/* Progress Bar */}
+      <div className={`w-full h-1 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
+        <div className="h-full bg-purple-500 w-1/3 transition-all duration-300"></div>
+      </div>
+      
+      <div className="flex items-center justify-between p-3">
+        {/* Song Info - Clickable to maximize */}
+        <div className="flex items-center flex-1 min-w-0 cursor-pointer" onClick={onMaximize}>
+          <img
+            src={imageUrl || song.image}
+            alt={song.name}
+            className="w-12 h-12 rounded-lg object-cover mr-3 flex-shrink-0"
+          />
+          
+          <div className="flex-1 min-w-0">
+            <h3 className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'} truncate text-sm`}>{song.name}</h3>
+            <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-xs truncate`}>{song.artist}</p>
+          </div>
+        </div>
+        
+        {/* Like Button */}
+        <button 
+          onClick={handleLike}
+          className={`p-2 ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} rounded-full transition-colors mr-2`}
+        >
+          <Heart 
+            size={16} 
+            className={`transition-colors ${song.isLiked ? 'text-red-500 fill-red-500' : isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} 
+          />
+        </button>
+        
+        {/* Controls */}
+        <div className="flex items-center space-x-1">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              onPrevious();
+            }}
+            className={`p-2 ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} rounded-full transition-colors`}
+          >
+            <SkipBack size={18} className={isDarkMode ? 'text-gray-300' : 'text-gray-700'} />
+          </button>
+          
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onTogglePlay();
+            }}
+            className={`p-2 ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} rounded-full transition-colors`}
+          >
+            {isPlaying ? (
+              <Pause size={20} className={isDarkMode ? 'text-white' : 'text-gray-900'} />
+            ) : (
+              <Play size={20} className={isDarkMode ? 'text-white' : 'text-gray-900'} fill={isDarkMode ? 'white' : '#111827'} />
+            )}
+          </button>
+          
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onNext();
+            }}
+            className={`p-2 ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} rounded-full transition-colors`}
+          >
+            <SkipForward size={18} className={isDarkMode ? 'text-gray-300' : 'text-gray-700'} />
+          </button>
+          
+          {/* Close Button */}
+          <button
+            onClick={handleClose}
+            className={`p-2 ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} rounded-full transition-colors ml-1`}
+          >
+            <X size={18} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MinimizedPlayer;
+```
+
+## components/PlaylistsPage.tsx
+```typescript
+import React, { useState } from 'react';
+import { ArrowLeft, Play, Music, Plus, MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
+import { Playlist, Song } from '@/types';
+import { useTheme } from '@/components/ThemeContext';
+import SongCard from './SongCard';
+
+interface PlaylistsPageProps {
+  playlists: Playlist[];
+  onBack: () => void;
+  onSongPlay: (song: Song) => void;
+  onCreatePlaylist: () => void;
+  onDeletePlaylist: (playlistId: string) => void;
+  onRenamePlaylist: (playlistId: string, newName: string) => void;
+  onRemoveSongFromPlaylist: (playlistId: string, songId: string) => void;
+  imageUrls: Record<string, string>; // <-- Add this line
+}
+
+
+const PlaylistsPage: React.FC<PlaylistsPageProps> = ({ 
+  playlists, 
+  onBack, 
+  onSongPlay,
+  onCreatePlaylist,
+  onDeletePlaylist,
+  onRenamePlaylist,
+  onRemoveSongFromPlaylist,
+  imageUrls
+}) => {
+  const { isDarkMode } = useTheme();
+  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
+  const [showPlaylistMenu, setShowPlaylistMenu] = useState<string | null>(null);
+  const [editingPlaylist, setEditingPlaylist] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+
+  const formatNumber = (num: number): string => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
+  };
+
+  const handleRename = (playlistId: string) => {
+    const playlist = playlists.find(p => p.id === playlistId);
+    if (playlist) {
+      setEditName(playlist.name);
+      setEditingPlaylist(playlistId);
+      setShowPlaylistMenu(null);
+    }
+  };
+
+  const handleSaveRename = () => {
+    if (editingPlaylist && editName.trim()) {
+      onRenamePlaylist(editingPlaylist, editName.trim());
+      setEditingPlaylist(null);
+      setEditName('');
+    }
+  };
+
+  const handleCancelRename = () => {
+    setEditingPlaylist(null);
+    setEditName('');
+  };
+
+  const handleDelete = (playlistId: string) => {
+    onDeletePlaylist(playlistId);
+    setShowPlaylistMenu(null);
+    if (selectedPlaylist?.id === playlistId) {
+      setSelectedPlaylist(null);
+    }
+  };
+
+  const handleRemoveSong = (songId: string) => {
+    if (selectedPlaylist) {
+      onRemoveSongFromPlaylist(selectedPlaylist.id, songId);
+      // Update the selected playlist to reflect the change
+      const updatedPlaylist = {
+        ...selectedPlaylist,
+        songs: selectedPlaylist.songs.filter(song => song.id !== songId),
+        songCount: selectedPlaylist.songs.filter(song => song.id !== songId).length
+      };
+      setSelectedPlaylist(updatedPlaylist);
+    }
+  };
+
+  if (selectedPlaylist) {
+    return (
+      <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+        {/* Header */}
+        <div className={`sticky top-0 ${isDarkMode ? 'bg-gray-900/95' : 'bg-gray-50/95'} backdrop-blur-md z-10 px-4 py-4`}>
+          <div className="flex items-center mb-4">
+            <button 
+              onClick={() => setSelectedPlaylist(null)}
+              className={`p-2 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200'} rounded-full transition-colors mr-3`}
+            >
+              <ArrowLeft size={24} />
+            </button>
+            <h1 className="text-2xl font-bold">{selectedPlaylist.name}</h1>
+          </div>
+        </div>
+
+        {/* Playlist Header */}
+        <div className="px-4 mb-6">
+          <div className="flex items-center mb-4">
+            <img
+              src={
+                selectedPlaylist.songs.length > 0
+                  ? imageUrls[selectedPlaylist.songs[0].id] || '/placeholder.png'
+                  : '/placeholder.png'
+              }
+              alt={selectedPlaylist.name}
+              className="w-32 h-32 rounded-lg object-cover mr-4"
+            />
+
+            <div>
+              <h2 className="text-xl font-bold mb-2">{selectedPlaylist.name}</h2>
+              <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
+                {selectedPlaylist.songCount} songs
+              </p>
+              {selectedPlaylist.songs.length > 0 && (
+                <button className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-full flex items-center transition-colors">
+                  <Play size={16} className="mr-2" fill="white" />
+                  Play All
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Songs */}
+        <div className="px-4 pb-4">
+          {selectedPlaylist.songs.length > 0 ? (
+            <div className="space-y-3">
+              {selectedPlaylist.songs.map((song) => (
+                <div key={song.id} className="relative group">
+                  <SongCard 
+                    song={song} 
+                    onPlay={onSongPlay} 
+                    formatNumber={formatNumber}
+                    showRemoveButton={true}
+                    onRemove={() => handleRemoveSong(song.id)}
+                    cachedImageUrl={imageUrls[song.id] || '/placeholder.png'}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Music size={64} className={`mx-auto mb-4 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
+              <h3 className="text-xl font-semibold mb-2">No songs in this playlist</h3>
+              <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
+                Add songs to get started
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+      {/* Header */}
+      <div className={`sticky top-0 ${isDarkMode ? 'bg-gray-900/95' : 'bg-gray-50/95'} backdrop-blur-md z-10 px-4 py-4`}>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center">
+            <button 
+              onClick={onBack}
+              className={`p-2 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200'} rounded-full transition-colors mr-3`}
+            >
+              <ArrowLeft size={24} />
+            </button>
+            <h1 className="text-2xl font-bold">Your Playlists</h1>
+          </div>
+          <button
+            onClick={onCreatePlaylist}
+            className="bg-purple-500 hover:bg-purple-600 text-white p-2 rounded-full transition-colors"
+          >
+            <Plus size={20} />
+          </button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="px-4 pb-4">
+        {playlists.length > 0 ? (
+          <div className="grid gap-4">
+            {playlists.map((playlist) => (
+              <div key={playlist.id} className="relative">
+                {editingPlaylist === playlist.id ? (
+                  <div className={`flex items-center p-4 ${isDarkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-lg`}>
+                    <img
+                        src={
+                          playlist.songs.length > 0
+                            ? imageUrls[playlist.songs[0].id] || '/placeholder.png'
+                            : '/placeholder.png'
+                        }
+                        alt={playlist.name}
+                        className="w-16 h-16 rounded-lg object-cover mr-4"
+                      />
+
+                    <div className="flex-1 flex items-center space-x-3">
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className={`flex-1 ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'} border rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                        autoFocus
+                        onKeyPress={(e) => e.key === 'Enter' && handleSaveRename()}
+                      />
+                      <button
+                        onClick={handleSaveRename}
+                        className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={handleCancelRename}
+                        className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} px-4 py-2 rounded-lg transition-colors`}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setSelectedPlaylist(playlist)}
+                    className={`w-full flex items-center p-4 ${isDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg transition-colors text-left`}
+                  >
+                    <img
+                      src={
+                        playlist.songs.length > 0
+                          ? imageUrls[playlist.songs[0].id] || '/placeholder.png'
+                          : '/placeholder.png'
+                      }
+                      alt={playlist.name}
+                      className="w-16 h-16 rounded-lg object-cover mr-4"
+                    />
+
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg">{playlist.name}</h3>
+                      <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>
+                        {playlist.songCount} songs
+                      </p>
+                    </div>
+                    <div className="relative">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowPlaylistMenu(showPlaylistMenu === playlist.id ? null : playlist.id);
+                        }}
+                        className={`p-2 ${isDarkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'} rounded-full transition-colors`}
+                      >
+                        <MoreHorizontal size={20} />
+                      </button>
+                      
+                      {showPlaylistMenu === playlist.id && (
+                        <div className={`absolute right-0 top-12 ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'} border rounded-lg shadow-lg py-2 w-48 z-20`}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRename(playlist.id);
+                            }}
+                            className={`w-full text-left px-4 py-2 ${isDarkMode ? 'hover:bg-gray-600 text-white' : 'hover:bg-gray-100 text-gray-900'} flex items-center transition-colors`}
+                          >
+                            <Edit2 size={16} className="mr-3" />
+                            Rename
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(playlist.id);
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-red-600 text-red-400 hover:text-white flex items-center transition-colors"
+                          >
+                            <Trash2 size={16} className="mr-3" />
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <Music size={64} className={`mx-auto mb-4 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
+            <h3 className="text-xl font-semibold mb-2">No playlists yet</h3>
+            <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-6`}>
+              Create your first playlist to organize your music
+            </p>
+            <button
+              onClick={onCreatePlaylist}
+              className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-full flex items-center mx-auto transition-colors"
+            >
+              <Plus size={18} className="mr-2" />
+              Create Playlist
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default PlaylistsPage;
+```
+
+## components/SearchPage.tsx
+```typescript
+import React, { useState } from 'react';
+import { Search, Music, Plus } from 'lucide-react';
+import { Song } from '@/types';
+import { useTheme } from '@/components/ThemeContext';
+import SongCard from './SongCard';
+
+interface SearchPageProps {
+  songs: Song[];
+  onSongPlay: (song: Song) => void;
+  formatNumber: (num: number) => string;
+  onAddToPlaylist: (song: Song) => void;
+  imageUrls: Record<string, string>;
+  setImageUrls: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+}
+
+
+const SearchPage: React.FC<SearchPageProps> = ({ songs, onSongPlay, formatNumber, onAddToPlaylist,imageUrls,setImageUrls }) => {
+  const { isDarkMode } = useTheme();
+  const [pendingSearch, setPendingSearch] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchSubmitted, setSearchSubmitted] = useState(false);
+  const [isLoadingImages, setIsLoadingImages] = useState(false);
+  const [displayCount, setDisplayCount] = useState(10);
+
+  
+  const filteredSongs = songs.filter(song =>
+    song.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    song.artist.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    song.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  const displayedSongs = filteredSongs.slice(0, displayCount);
+  const hasMoreSongs = displayCount < filteredSongs.length;
+  const handleSearchSubmit = async () => {
+  setSearchQuery(pendingSearch);
+  setSearchSubmitted(true);
+  setDisplayCount(10);
+  setIsLoadingImages(true);
+
+  const filtered = songs.filter(song =>
+    song.name.toLowerCase().includes(pendingSearch.toLowerCase()) ||
+    song.artist.toLowerCase().includes(pendingSearch.toLowerCase()) ||
+    song.tags.some(tag => tag.toLowerCase().includes(pendingSearch.toLowerCase()))
+  );
+
+  const missingUrls: Record<string, string> = {};
+  for (const song of filtered) {
+    if (!imageUrls[song.img_id]) {
+      missingUrls[song.img_id] = `/api/image-proxy?fileid=${song.img_id}`;
+    }
+  }
+
+  if (Object.keys(missingUrls).length > 0) {
+    setImageUrls(prev => ({ ...prev, ...missingUrls }));
+  }
+
+  setIsLoadingImages(false);
+};
+
+  const loadMore = () => {
+    setDisplayCount(prev => prev + 10);
+  };
+
+  return (
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+      {/* Header */}
+      <div className={`sticky top-0 ${isDarkMode ? 'bg-gray-900/95' : 'bg-gray-50/95'} backdrop-blur-md z-10 px-4 py-4`}>
+        <h1 className="text-2xl font-bold mb-4">Search</h1>
+        
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} size={20} />
+          <input
+            type="text"
+            placeholder="What do you want to listen to?"
+            value={pendingSearch}
+            onChange={(e) => setPendingSearch(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSearchSubmit();
+              }
+            }}
+            className={`w-full ${isDarkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-full py-3 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all`} // existing styles
+          />
+
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="px-4 pb-4">
+                {searchQuery === '' ? (
+          <>
+            {/* Keep tag categories exactly as-is */}
+            <div>
+              <h2 className="text-lg font-semibold mb-4">Browse all</h2>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { name: 'Pop', color: 'from-pink-500 to-purple-500' },
+                  { name: 'Rock', color: 'from-red-500 to-orange-500' },
+                  { name: 'Hip-Hop', color: 'from-yellow-500 to-green-500' },
+                  { name: 'Electronic', color: 'from-blue-500 to-indigo-500' },
+                  { name: 'Jazz', color: 'from-purple-500 to-pink-500' },
+                  { name: 'Classical', color: 'from-gray-500 to-gray-700' }
+                ].map((category, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setPendingSearch(category.name);
+                      handleSearchSubmit();
+                    }}
+                    className={`relative p-4 rounded-lg bg-gradient-to-br ${category.color} h-24 overflow-hidden transition-transform hover:scale-105`}
+                  >
+                    <h3 className="font-semibold text-white">{category.name}</h3>
+                    <Music className="absolute bottom-2 right-2 text-white/50" size={32} />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        ) : (
+          <div>
+            <h2 className="text-lg font-semibold mb-4">
+              {filteredSongs.length > 0 ? `Found ${filteredSongs.length} results` : 'No results found'}
+            </h2>
+
+            {isLoadingImages ? (
+              <div className="flex items-center justify-center py-10">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-500"></div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {!searchSubmitted ? (
+                  // Only show names
+                  displayedSongs.map(song => (
+                    <div key={song.id} className="px-4 py-2 border-b">
+                      {song.name}
+                    </div>
+                  ))
+                ) : (
+                  // Full SongCard
+                  displayedSongs.map(song => (
+                    <SongCard
+                      key={song.id}
+                      song={song}
+                      onPlay={onSongPlay}
+                      formatNumber={formatNumber}
+                      onAddToPlaylist={onAddToPlaylist}
+                      cachedImageUrl={imageUrls[song.img_id]}
+                    />
+                  ))
+                )}
+              </div>
+            )}
+
+            {hasMoreSongs && searchSubmitted && !isLoadingImages && (
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={() => setDisplayCount(prev => prev + 10)}
+                  className={`flex items-center space-x-2 px-6 py-3 ${isDarkMode ? 'bg-gray-800 hover:bg-gray-700 border-gray-700' : 'bg-white hover:bg-gray-50 border-gray-200'} border rounded-full transition-colors`}
+                >
+                  <Plus size={18} className="text-purple-400" />
+                  <span className={isDarkMode ? 'text-white' : 'text-gray-900'}>Load More</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default SearchPage;
+```
+
+## components/SettingsPage.tsx
+```typescript
+import React from 'react';
+import { User, Heart, List, LogOut, ChevronRight, Moon, Sun, Bell, Download } from 'lucide-react';
+import { useTheme } from '@/components/ThemeContext';
+import { useAuth } from '@/hooks/useAuth';
+
+interface SettingsPageProps {
+  onPlaylistsClick: () => void;
+  onLikedClick: () => void;
+}
+
+const SettingsPage: React.FC<SettingsPageProps> = ({ onPlaylistsClick, onLikedClick }) => {
+  const { isDarkMode, toggleTheme } = useTheme();
+  const { user, signOut } = useAuth();
+
+  return (
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+      {/* Header */}
+      <div className={`sticky top-0 ${isDarkMode ? 'bg-gray-900/95' : 'bg-gray-50/95'} backdrop-blur-md z-10 px-4 py-4`}>
+        <h1 className="text-2xl font-bold">Settings</h1>
+      </div>
+
+      {/* Content */}
+      <div className="px-4 pb-8">
+        {/* Profile Section */}
+        <div className="mb-8">
+          <div className={`flex items-center p-4 ${isDarkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-lg`}>
+            {user?.user_metadata?.avatar_url ? (
+              <img 
+                src={user.user_metadata.avatar_url} 
+                alt="Profile" 
+                className="w-16 h-16 rounded-full mr-4"
+              />
+            ) : (
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-4">
+                <User size={24} />
+              </div>
+            )}
+            <div className="flex-1">
+              <h3 className="font-semibold text-lg">
+                {user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}
+              </h3>
+              <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
+                {user?.email}
+              </p>
+            </div>
+            <ChevronRight className={isDarkMode ? 'text-gray-400' : 'text-gray-500'} size={20} />
+          </div>
+        </div>
+
+        {/* Settings Options */}
+        <div className="space-y-6">
+          {/* Music Library */}
+          <div>
+            <h2 className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Music Library</h2>
+            <div className="space-y-2">
+              <button 
+                onClick={onPlaylistsClick}
+                className={`w-full flex items-center justify-between p-4 ${isDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg transition-colors`}
+              >
+                <div className="flex items-center">
+                  <List className="mr-3 text-purple-400" size={20} />
+                  <span>Playlists</span>
+                </div>
+                <ChevronRight className={isDarkMode ? 'text-gray-400' : 'text-gray-500'} size={16} />
+              </button>
+              
+              <button 
+                onClick={onLikedClick}
+                className={`w-full flex items-center justify-between p-4 ${isDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg transition-colors`}
+              >
+                <div className="flex items-center">
+                  <Heart className="mr-3 text-red-400" size={20} />
+                  <span>Liked Songs</span>
+                </div>
+                <ChevronRight className={isDarkMode ? 'text-gray-400' : 'text-gray-500'} size={16} />
+              </button>
+
+              <button className={`w-full flex items-center justify-between p-4 ${isDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg transition-colors`}>
+                <div className="flex items-center">
+                  <Download className="mr-3 text-green-400" size={20} />
+                  <span>Downloaded</span>
+                </div>
+                <ChevronRight className={isDarkMode ? 'text-gray-400' : 'text-gray-500'} size={16} />
+              </button>
+            </div>
+          </div>
+
+          {/* Preferences */}
+          <div>
+            <h2 className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Preferences</h2>
+            <div className="space-y-2">
+              <button 
+                onClick={toggleTheme}
+                className={`w-full flex items-center justify-between p-4 ${isDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg transition-colors`}
+              >
+                <div className="flex items-center">
+                  {isDarkMode ? (
+                    <Moon className="mr-3 text-blue-400" size={20} />
+                  ) : (
+                    <Sun className="mr-3 text-yellow-500" size={20} />
+                  )}
+                  <span>{isDarkMode ? 'Dark Mode' : 'Light Mode'}</span>
+                </div>
+                <div className={`w-12 h-6 ${isDarkMode ? 'bg-purple-500' : 'bg-gray-300'} rounded-full relative transition-colors`}>
+                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${isDarkMode ? 'right-1' : 'left-1'}`}></div>
+                </div>
+              </button>
+              
+              <button className={`w-full flex items-center justify-between p-4 ${isDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg transition-colors`}>
+                <div className="flex items-center">
+                  <Bell className="mr-3 text-yellow-400" size={20} />
+                  <span>Notifications</span>
+                </div>
+                <ChevronRight className={isDarkMode ? 'text-gray-400' : 'text-gray-500'} size={16} />
+              </button>
+            </div>
+          </div>
+
+          {/* Account */}
+          <div>
+            <h2 className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Account</h2>
+            <div className="space-y-2">
+              <button 
+                onClick={signOut}
+                className="w-full flex items-center justify-between p-4 bg-red-900/20 border border-red-800 rounded-lg hover:bg-red-900/30 transition-colors"
+              >
+                <div className="flex items-center">
+                  <LogOut className="mr-3 text-red-400" size={20} />
+                  <span className="text-red-400">Logout</span>
+                </div>
+                <ChevronRight className="text-red-400" size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SettingsPage;
+```
+
+## components/SongCard.tsx
+```typescript
+import React from 'react';
+import { Play, Heart, Eye, MoreHorizontal, Plus, X } from 'lucide-react';
+import { Song } from '@/types';
+import { useTheme } from '@/components/ThemeContext';
+
+interface SongCardProps {
+  song: Song;
+  onPlay: (song: Song) => void;
+  formatNumber: (num: number) => string;
+  onAddToPlaylist?: (song: Song) => void;
+  showRemoveButton?: boolean;
+  onRemove?: () => void;
+  cachedImageUrl: string;
+}
+
+const SongCard: React.FC<SongCardProps> = ({ 
+  song, 
+  onPlay, 
+  formatNumber, 
+  onAddToPlaylist,
+  showRemoveButton = false,
+  onRemove,
+  cachedImageUrl
+}) => {
+  const { isDarkMode } = useTheme();
+
+  const handleContainerClick = () => {
+    onPlay(song);
+  };
+
+  const handleButtonClick = (e: React.MouseEvent, action: () => void) => {
+    e.stopPropagation();
+    action();
+  };
+
+  return (
+    <div 
+      onClick={handleContainerClick}
+      className={`flex items-center p-3 ${isDarkMode ? 'bg-gray-800/50 hover:bg-gray-800' : 'bg-white/50 hover:bg-white border border-gray-200'} rounded-lg transition-all group cursor-pointer`}
+    >
+      <div className="relative mr-3">
+        <img
+          src={cachedImageUrl}
+          alt={song.name}
+          className="w-12 h-12 rounded-lg object-cover"
+        />
+        <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <Play className="text-white" size={16} fill="white" />
+        </div>
+      </div>
+      
+      <div className="flex-1 min-w-0">
+        <h3 className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'} truncate`}>{song.name}</h3>
+        <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-sm truncate`}>{song.artist}</p>
+        <div className="flex items-center space-x-4 mt-1">
+          <div className="flex items-center space-x-1">
+            <Eye size={12} className={isDarkMode ? 'text-gray-500' : 'text-gray-400'} />
+            <span className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'} text-xs`}>{formatNumber(song.views)}</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <Heart size={12} className={`${song.isLiked ? 'text-red-500 fill-red-500' : isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />
+            <span className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'} text-xs`}>{formatNumber(song.likes)}</span>
+          </div>
+          <span className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'} text-xs`}>{song.language}</span>
+        </div>
+      </div>
+      
+      <div className="flex items-center space-x-2 ml-3">
+        {showRemoveButton && onRemove && (
+          <button 
+            onClick={(e) => handleButtonClick(e, onRemove)}
+            className={`p-1 ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'} rounded-full transition-colors text-red-400 hover:text-red-300`}
+          >
+            <X size={16} />
+          </button>
+        )}
+        {onAddToPlaylist && (
+          <button 
+            onClick={(e) => handleButtonClick(e, () => onAddToPlaylist(song))}
+            className={`p-1 ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'} rounded-full transition-colors`}
+          >
+            <Plus size={16} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
+          </button>
+        )}
+        <button 
+          onClick={(e) => handleButtonClick(e, () => {})}
+          className={`p-1 ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'} rounded-full transition-colors`}
+        >
+          <MoreHorizontal size={16} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default SongCard;
+```
+
+## components/ThemeContext.tsx
+```typescript
+'use client'
+
+import React, { createContext, useContext, useState } from 'react';
+
+interface ThemeContextType {
+  isDarkMode: boolean;
+  toggleTheme: () => void;
+}
+
+const ThemeContext = createContext<ThemeContextType>({
+  isDarkMode: true,
+  toggleTheme: () => {}
+});
+
+export const useTheme = () => useContext(ThemeContext);
+
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  const toggleTheme = () => {
+    setIsDarkMode((prev) => !prev);
+  };
+
+  return (
+    <ThemeContext.Provider value={{ isDarkMode, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+```
+
+## components/TrendingSong.tsx
+```typescript
+import React from 'react';
+import { Play, Heart, Eye } from 'lucide-react';
+import { Song } from '@/types';
+import { useTheme } from '@/components/ThemeContext';
+
+interface TrendingSongProps {
+  song: Song;
+  onPlay: (song: Song) => void;
+  formatNumber: (num: number) => string;
+  cachedImageUrl: string;
+}
+
+const TrendingSong: React.FC<TrendingSongProps> = ({ song, onPlay, formatNumber,cachedImageUrl }) => {
+  const { isDarkMode } = useTheme();
+
+  const handleClick = () => {
+    onPlay(song);
+  };
+
+  return (
+    <div className="flex-shrink-0 w-40 group cursor-pointer" onClick={handleClick}>
+      <div className="relative mb-2">
+        <img
+         src={cachedImageUrl}
+          alt={song.name}
+          className="w-full h-40 rounded-lg object-cover"
+        />
+        <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <Play className="text-white" size={24} fill="white" />
+        </div>
+        <div className="absolute top-2 right-2 bg-black/70 rounded-full p-1">
+          <Heart size={16} className={`${song.isLiked ? 'text-red-500 fill-red-500' : 'text-white'}`} />
+        </div>
+      </div>
+      
+      <div>
+        <h3 className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'} truncate text-sm`}>{song.name}</h3>
+        <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-xs truncate`}>{song.artist}</p>
+        <div className="flex items-center justify-between mt-1">
+          <div className="flex items-center space-x-1">
+            <Eye size={10} className={isDarkMode ? 'text-gray-500' : 'text-gray-400'} />
+            <span className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'} text-xs`}>{formatNumber(song.views)}</span>
+          </div>
+          <span className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'} text-xs`}>{song.language}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TrendingSong;
+```
+
+## hooks/useAuth.ts
+```typescript
+import { useEffect, useState } from 'react'
+import { User } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase'
+
+export function useAuth() {
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // Get initial session
+    const getInitialSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      setUser(session?.user ?? null)
+      setLoading(false)
+    }
+
+    getInitialSession()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setUser(session?.user ?? null)
+        setLoading(false)
+
+        // Update last_login when user signs in
+        if (event === 'SIGNED_IN' && session?.user) {
+          await supabase
+            .from('users')
+            .upsert({
+              id: session.user.id,
+              email: session.user.email!,
+              username: session.user.user_metadata?.full_name || session.user.user_metadata?.name,
+              avatar_url: session.user.user_metadata?.avatar_url,
+              last_login: new Date().toISOString()
+            })
+        }
+      }
+    )
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}`
+      }
+    })
+    if (error) console.error('Error signing in:', error)
+  }
+
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut()
+    if (error) console.error('Error signing out:', error)
+  }
+
+  return {
+    user,
+    loading,
+    signInWithGoogle,
+    signOut
+  }
+}
+```
+
+## hooks/useSupabaseData.ts
+```typescript
+import { useState, useEffect, useRef } from 'react'
+import { User } from '@supabase/supabase-js'
+import { supabase, DatabaseSong, DatabasePlaylist } from '@/lib/supabase'
+import { Song, Playlist } from '@/types'
+
+export function useSupabaseData(user: User | null) {
+  const [songs, setSongs] = useState<Song[]>([])
+  const [playlists, setPlaylists] = useState<Playlist[]>([])
+  const [likedSongs, setLikedSongs] = useState<Set<number>>(new Set())
+  const [lastPlayedSong, setLastPlayedSong] = useState<Song | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [currentSongStartTime, setCurrentSongStartTime] = useState<Date | null>(null)
+  const currentSongRef = useRef<string | null>(null)
+
+  // Convert database song to UI song format
+  const convertDatabaseSong = (dbSong: DatabaseSong, isLiked: boolean = false): Song => ({
+    file_id: dbSong.file_id,
+    img_id: dbSong.img_id,
+    name: dbSong.name,
+    artist: dbSong.artist,
+    language: dbSong.language,
+    tags: dbSong.tags,
+    views: dbSong.views,
+    likes: dbSong.likes,
+    id: dbSong.file_id.toString(),
+    image: `https://images.pexels.com/photos/${dbSong.img_id}/pexels-photo-${dbSong.img_id}.jpeg?auto=compress&cs=tinysrgb&w=300`,
+    isLiked
+  })
+
+  // Fetch all songs
+  const fetchSongs = async () => {
+    try {
+      const { data: songsData, error } = await supabase
+        .from('songs')
+        .select('*')
+        .order('views', { ascending: false })
+
+      if (error) throw error
+
+      let userLikedSongs = new Set<number>()
+      
+      if (user) {
+        const { data: likedData } = await supabase
+          .from('liked_songs')
+          .select('song_id')
+          .eq('user_id', user.id)
+        
+        if (likedData) {
+          userLikedSongs = new Set(likedData.map(item => item.song_id))
+          setLikedSongs(userLikedSongs)
+        }
+      }
+
+      const convertedSongs = songsData?.map(song => 
+        convertDatabaseSong(song, userLikedSongs.has(song.file_id))
+      ) || []
+
+      const sortedSongs = [...convertedSongs].sort((a, b) => {
+        const aScore = a.views + a.likes;
+        const bScore = b.views + b.likes;
+        return bScore - aScore;
+      });
+
+      setSongs(sortedSongs);
+
+      if (user) {
+        const { data: userData } = await supabase
+          .from('users')
+          .select('last_song_file_id')
+          .eq('id', user.id)
+          .single()
+
+        if (userData?.last_song_file_id) {
+          const lastSong = convertedSongs.find(song => song.file_id === userData.last_song_file_id)
+          if (lastSong) {
+            setLastPlayedSong(lastSong)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching songs:', error)
+    }
+  }
+
+  // Fetch user playlists
+  const fetchPlaylists = async () => {
+    if (!user) {
+      setPlaylists([])
+      return
+    }
+
+    try {
+      const { data: playlistsData, error } = await supabase
+        .from('playlists')
+        .select(`
+          id,
+          name,
+          playlist_songs (
+            songs (*)
+          )
+        `)
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      const convertedPlaylists: Playlist[] = playlistsData?.map(playlist => {
+        const playlistSongs = playlist.playlist_songs?.map((ps: any) => 
+          convertDatabaseSong(ps.songs, likedSongs.has(ps.songs.file_id))
+        ) || []
+
+        return {
+          id: playlist.id.toString(),
+          name: playlist.name,
+          songCount: playlistSongs.length,
+          image: playlistSongs[0]?.image || 'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=300',
+          songs: playlistSongs
+        }
+      }) || []
+
+      setPlaylists(convertedPlaylists)
+    } catch (error) {
+      console.error('Error fetching playlists:', error)
+    }
+  }
+
+  // Toggle like song
+  const toggleLike = async (songId: string) => {
+    if (!user) return
+
+    const songFileId = parseInt(songId)
+    const isCurrentlyLiked = likedSongs.has(songFileId)
+
+    try {
+      if (isCurrentlyLiked) {
+        const { error } = await supabase
+          .from('liked_songs')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('song_id', songFileId)
+
+        if (error) throw error
+
+        setLikedSongs(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(songFileId)
+          return newSet
+        })
+      } else {
+        const { error } = await supabase
+          .from('liked_songs')
+          .insert({
+            user_id: user.id,
+            song_id: songFileId
+          })
+
+        if (error) throw error
+
+        setLikedSongs(prev => new Set(prev).add(songFileId))
+      }
+
+      // Update songs state
+      setSongs(prevSongs => 
+        prevSongs.map(song => 
+          song.id === songId ? { ...song, isLiked: !isCurrentlyLiked } : song
+        )
+      )
+
+      // Update playlists state
+      setPlaylists(prevPlaylists =>
+        prevPlaylists.map(playlist => ({
+          ...playlist,
+          songs: playlist.songs.map(song =>
+            song.id === songId ? { ...song, isLiked: !isCurrentlyLiked } : song
+          )
+        }))
+      )
+    } catch (error) {
+      console.error('Error toggling like:', error)
+    }
+  }
+
+  // Create playlist
+  const createPlaylist = async (name: string) => {
+    if (!user) return
+
+    try {
+      const { data, error } = await supabase
+        .from('playlists')
+        .insert({
+          user_id: user.id,
+          name
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      const newPlaylist: Playlist = {
+        id: data.id.toString(),
+        name: data.name,
+        songCount: 0,
+        image: 'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=300',
+        songs: []
+      }
+
+      setPlaylists(prev => [...prev, newPlaylist])
+    } catch (error) {
+      console.error('Error creating playlist:', error)
+    }
+  }
+
+  // Delete playlist
+  const deletePlaylist = async (playlistId: string) => {
+    if (!user) return
+
+    try {
+      const { error } = await supabase
+        .from('playlists')
+        .delete()
+        .eq('id', parseInt(playlistId))
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      setPlaylists(prev => prev.filter(playlist => playlist.id !== playlistId))
+    } catch (error) {
+      console.error('Error deleting playlist:', error)
+    }
+  }
+
+  // Rename playlist
+  const renamePlaylist = async (playlistId: string, newName: string) => {
+    if (!user) return
+
+    try {
+      const { error } = await supabase
+        .from('playlists')
+        .update({ name: newName })
+        .eq('id', parseInt(playlistId))
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      setPlaylists(prev => 
+        prev.map(playlist => 
+          playlist.id === playlistId 
+            ? { ...playlist, name: newName }
+            : playlist
+        )
+      )
+    } catch (error) {
+      console.error('Error renaming playlist:', error)
+    }
+  }
+
+  // Add song to playlist
+  const addSongToPlaylist = async (playlistId: string, song: Song) => {
+    if (!user) return
+
+    try {
+      const { error } = await supabase
+        .from('playlist_songs')
+        .insert({
+          playlist_id: parseInt(playlistId),
+          song_id: song.file_id
+        })
+
+      if (error) throw error
+
+      setPlaylists(prev => 
+        prev.map(playlist => {
+          if (playlist.id === playlistId) {
+            const songExists = playlist.songs.some(s => s.id === song.id)
+            if (!songExists) {
+              const updatedSongs = [...playlist.songs, song]
+              return {
+                ...playlist,
+                songs: updatedSongs,
+                songCount: updatedSongs.length,
+                image: updatedSongs[0]?.image || playlist.image
+              }
+            }
+          }
+          return playlist
+        })
+      )
+    } catch (error) {
+      console.error('Error adding song to playlist:', error)
+    }
+  }
+
+  // Remove song from playlist
+  const removeSongFromPlaylist = async (playlistId: string, songId: string) => {
+    if (!user) return
+
+    try {
+      const { error } = await supabase
+        .from('playlist_songs')
+        .delete()
+        .eq('playlist_id', parseInt(playlistId))
+        .eq('song_id', parseInt(songId))
+
+      if (error) throw error
+
+      setPlaylists(prev => 
+        prev.map(playlist => {
+          if (playlist.id === playlistId) {
+            const updatedSongs = playlist.songs.filter(song => song.id !== songId)
+            return {
+              ...playlist,
+              songs: updatedSongs,
+              songCount: updatedSongs.length,
+              image: updatedSongs[0]?.image || 'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=300'
+            }
+          }
+          return playlist
+        })
+      )
+    } catch (error) {
+      console.error('Error removing song from playlist:', error)
+    }
+  }
+
+  // Update last song in user profile
+  const updateLastSong = async (songId: string) => {
+    if (!user) return
+
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ last_song_file_id: parseInt(songId) })
+        .eq('id', user.id)
+
+      if (error) throw error
+    } catch (error) {
+      console.error('Error updating last song:', error)
+    }
+  }
+
+  // Record listening history with proper time tracking
+  const recordListeningHistory = async (songId: string) => {
+    if (!user) return
+
+    // If there's a previous song playing, record its listening time
+    if (currentSongRef.current && currentSongStartTime) {
+      const endTime = new Date()
+      const minutesListened = (endTime.getTime() - currentSongStartTime.getTime()) / (1000 * 60)
+      
+      if (minutesListened > 0.1) { // Only record if listened for more than 6 seconds
+        try {
+          const now = new Date()
+          const { error } = await supabase
+            .from('history')
+            .upsert({
+              user_id: user.id,
+              song_id: parseInt(currentSongRef.current),
+              last_date: now.toISOString().split('T')[0],
+              last_time: now.toTimeString().split(' ')[0],
+              minutes_listened: Math.round(minutesListened * 100) / 100 // Round to 2 decimal places
+            }, {
+              onConflict: 'user_id,song_id,last_date',
+              ignoreDuplicates: false
+            })
+
+          if (error) throw error
+        } catch (error) {
+          console.error('Error recording previous song history:', error)
+        }
+      }
+    }
+
+    // Set new song as current
+    currentSongRef.current = songId
+    setCurrentSongStartTime(new Date())
+    
+    // Update last song in user profile
+    await updateLastSong(songId)
+  }
+
+  // Stop current song tracking (when player is closed)
+  const stopCurrentSongTracking = async () => {
+    if (currentSongRef.current && currentSongStartTime && user) {
+      const endTime = new Date()
+      const minutesListened = (endTime.getTime() - currentSongStartTime.getTime()) / (1000 * 60)
+      
+      if (minutesListened > 0.1) {
+        try {
+          const now = new Date()
+          const { error } = await supabase
+            .from('history')
+            .upsert({
+              user_id: user.id,
+              song_id: parseInt(currentSongRef.current),
+              last_date: now.toISOString().split('T')[0],
+              last_time: now.toTimeString().split(' ')[0],
+              minutes_listened: Math.round(minutesListened * 100) / 100
+            }, {
+              onConflict: 'user_id,song_id,last_date',
+              ignoreDuplicates: false
+            })
+
+          if (error) throw error
+        } catch (error) {
+          console.error('Error recording final song history:', error)
+        }
+      }
+    }
+
+    currentSongRef.current = null
+    setCurrentSongStartTime(null)
+  }
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true)
+      await Promise.all([fetchSongs(), fetchPlaylists()])
+      setLoading(false)
+    }
+
+    if (user) {
+      loadData()
+    } else {
+      setLoading(false)
+    }
+  }, [user])
+
+  return {
+    songs,
+    playlists,
+    likedSongs: songs.filter(song => song.isLiked),
+    lastPlayedSong,
+    loading,
+    toggleLike,
+    createPlaylist,
+    deletePlaylist,
+    renamePlaylist,
+    addSongToPlaylist,
+    removeSongFromPlaylist,
+    recordListeningHistory,
+    stopCurrentSongTracking,
+    refreshData: () => {
+      fetchSongs()
+      fetchPlaylists()
+    }
+  }
+}
+```
+
+## hooks/useTheme.ts
+```typescript
+import { createContext, useContext } from 'react';
+
+interface ThemeContextType {
+  isDarkMode: boolean;
+  toggleTheme: () => void;
+}
+
+const ThemeContext = createContext<ThemeContextType>({
+  isDarkMode: true,
+  toggleTheme: () => {}
+});
+
+export const useTheme = () => useContext(ThemeContext);
+export default ThemeContext;
+```
+
+## lib/pcloud.ts
+```typescript
+const AUTH_TOKEN = 'fE93KkZMjhg7ZtHMudQY9CHj5m8MDH3CFxLEKsw1y';
+
+const imageCache = new Map<number, string>();
+
+export async function getFileLink(fileId: number): Promise<string> {
+  if (imageCache.has(fileId)) return imageCache.get(fileId)!;
+
+  const res = await fetch(`https://api.pcloud.com/getfilelink?fileid=${fileId}&auth=${AUTH_TOKEN}`);
+  const data = await res.json();
+
+  if (data.result === 0) {
+    const link = `https://${data.hosts[0]}${data.path}`;
+    imageCache.set(fileId, link);
+    return link;
+  }
+
+  throw new Error(data.error || 'Failed to get link');
+}
+```
+
+## lib/supabase.ts
+```typescript
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = 'https://fmuherccixmmotybpxcm.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtdWhlcmNjaXhtbW90eWJweGNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0MzcxNDAsImV4cCI6MjA2NzAxMzE0MH0.M1jBxv9FafNK_2c8-T-PpDtxzkKvpC8i9-hk-2ws-Q4';
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// Database types based on your schema
+export interface DatabaseSong {
+  file_id: number;
+  img_id: number;
+  name: string;
+  artist: string;
+  language: string;
+  tags: string[];
+  views: number;
+  likes: number;
+}
+
+export interface DatabaseUser {
+  id: string;
+  email: string;
+  username?: string;
+  avatar_url?: string;
+  created_at: string;
+  last_login?: string;
+  last_song_file_id?: number;
+}
+
+export interface DatabasePlaylist {
+  id: number;
+  user_id: string;
+  name: string;
+}
+
+export interface DatabaseHistory {
+  id: number;
+  user_id: string;
+  song_id: number;
+  last_date: string;
+  last_time: string;
+  minutes_listened: number;
+}
+```
+
+## pages/api/audio-proxy.ts
+```typescript
+// /pages/api/audio-proxy.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
+import https from 'https';
+
+const token = 'fE93KkZMjhg7ZtHMudQY9CHj5m8MDH3CFxLEKsw1y';
+const cache = new Map<string, string>();
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { fileid } = req.query;
+  if (!fileid || typeof fileid !== 'string') {
+    return res.status(400).json({ error: 'Missing fileid' });
+  }
+
+  try {
+    let streamUrl = cache.get(fileid);
+    if (!streamUrl) {
+      const metaRes = await fetch(`https://api.pcloud.com/getfilelink?fileid=${fileid}&auth=${token}`);
+      const metaData = await metaRes.json();
+
+      if (metaData.result !== 0 || !metaData.hosts?.length || !metaData.path) {
+        return res.status(500).json({ error: 'Failed to fetch link' });
+      }
+
+      streamUrl = `https://${metaData.hosts[0]}${metaData.path}`;
+      cache.set(fileid, streamUrl);
+    }
+
+    https.get(
+      streamUrl,
+      {
+        headers: {
+          Range: req.headers.range || '', // Forward Range header
+        },
+      },
+      (pcloudRes) => {
+        res.writeHead(pcloudRes.statusCode || 200, pcloudRes.headers);
+        pcloudRes.pipe(res);
+      }
+    ).on('error', (err) => {
+      console.error('Proxy error:', err);
+      res.status(500).end('Stream failed');
+    });
+
+  } catch (error) {
+    console.error('Unhandled error:', error);
+    res.status(500).json({ error: 'Unhandled exception' });
+  }
+}
+```
+
+## pages/api/image-proxy.ts
+```typescript
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+const AUTH_TOKEN = 'fE93KkZMjhg7ZtHMudQY9CHj5m8MDH3CFxLEKsw1y';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const fileid = req.query.fileid as string;
+
+  if (!fileid) {
+    return res.status(400).json({ error: 'Missing fileid' });
+  }
+
+  try {
+    const meta = await fetch(`https://api.pcloud.com/getfilelink?fileid=${fileid}&auth=${AUTH_TOKEN}`);
+    const json = await meta.json();
+
+    if (json.result !== 0) {
+      return res.status(500).json({ error: json.error });
+    }
+
+    const fileUrl = `https://${json.hosts[0]}${json.path}`;
+    const imageRes = await fetch(fileUrl);
+
+    res.setHeader('Content-Type', imageRes.headers.get('Content-Type') || 'image/jpeg');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+
+    const buffer = await imageRes.arrayBuffer();
+    res.send(Buffer.from(buffer));
+  } catch (err) {
+    console.error('Image proxy error:', err);
+    res.status(500).json({ error: 'Failed to fetch image' });
+  }
+}
+```
+
+## types/index.ts
+```typescript
+export interface Song {
+  file_id: number;
+  img_id: number;
+  name: string;
+  artist: string;
+  language: string;
+  tags: string[];
+  views: number;
+  likes: number;
+  // UI-specific fields
+  id: string; // derived from file_id
+  image: string; // derived from img_id
+  isLiked: boolean; // user-specific state
+  audioUrl?: string; // for playback
+}
+
+export interface Playlist {
+  id: string;
+  name: string;
+  songCount: number;
+  image: string;
+  songs: Song[];
+  user_id?: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  username?: string;
+  avatar_url?: string;
+  created_at: string;
+  last_login?: string;
+  last_song_file_id?: number;
+}
+```
+
+## utils/imageCache.ts
+```typescript
+const imageCache: Record<number, string> = {};
+
+const AUTH_TOKEN = "fE93KkZMjhg7ZtHMudQY9CHj5m8MDH3CFxLEKsw1y";
+
+export async function getFileLink(fileId: number): Promise<string> {
+  if (imageCache[fileId]) {
+    return imageCache[fileId];
+  }
+
+  const response = await fetch(`https://api.pcloud.com/getfilelink?fileid=${fileId}&auth=${AUTH_TOKEN}`);
+  const data = await response.json();
+
+  if (data.result === 0) {
+    const url = `https://${data.hosts[0]}${data.path}`;
+    imageCache[fileId] = url;
+    return url;
+  } else {
+    throw new Error(data.error || "Failed to get link");
+  }
+}
+```
